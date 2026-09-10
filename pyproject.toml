@@ -1,0 +1,6 @@
+[project]
+name = "tuack-ng-plugins-tools"
+version = "0.1.0"
+description = "tuack-ng-plugins 插件市场索引工具"
+requires-python = ">=3.11"
+dependencies = ["pydantic>=2.7"]

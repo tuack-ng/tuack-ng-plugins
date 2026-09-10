@@ -1,0 +1,22 @@
+name: Validate
+
+on:
+  pull_request:
+    paths:
+      - "plugins/**"
+      - "tools/**"
+      - "pyproject.toml"
+      - "uv.lock"
+      - ".github/workflows/validate.yml"
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: 校验插件元数据
+        run: uv run --frozen python tools/validate.py --fetch
