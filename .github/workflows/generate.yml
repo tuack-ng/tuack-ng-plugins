@@ -2,7 +2,7 @@ name: Generate Index
 
 on:
   push:
-    branches: [main]
+    branches: [master]
     paths:
       - "plugins/**"
   schedule:
