@@ -33,7 +33,9 @@ def main() -> int:
             continue
 
         if meta.name != path.stem:
-            print(f"[FAIL] {path.name}\n    - name `{meta.name}` 与文件名 `{path.stem}` 不一致")
+            print(
+                f"[FAIL] {path.name}\n    - name `{meta.name}` 与文件名 `{path.stem}` 不一致"
+            )
             failed = True
             continue
         plugins[meta.name] = meta
@@ -50,11 +52,29 @@ def main() -> int:
     for warning in warnings:
         print(f"[WARN] {warning}")
 
+    if unchanged(index):
+        print("索引内容无变化，跳过更新。")
+        return 0
+
     market.INDEX_FILE.write_text(
         json.dumps(index, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
     print(f"已生成 {market.INDEX_FILE.name}，共 {len(index['plugins'])} 个插件。")
     return 0
+
+
+def unchanged(index: dict) -> bool:
+    """除 `generated_at` 外内容与现有 index.json 相同时返回 True。"""
+    if not market.INDEX_FILE.exists():
+        return False
+    try:
+        existing = json.loads(market.INDEX_FILE.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    return (
+        existing.get("schema") == index["schema"]
+        and existing.get("plugins") == index["plugins"]
+    )
 
 
 if __name__ == "__main__":

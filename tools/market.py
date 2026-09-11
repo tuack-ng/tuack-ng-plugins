@@ -22,7 +22,7 @@ import tomllib
 import urllib.error
 import urllib.request
 import zipfile
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
@@ -112,12 +112,14 @@ def repo_of(repo_url: str) -> str:
     """从仓库链接解析出 `owner/name`。"""
     match = REPO_URL_RE.match(repo_url)
     if not match:
-        raise ValueError(f"repo_url 必须是 https://github.com/<owner>/<name>：{repo_url!r}")
+        raise ValueError(
+            f"repo_url 必须是 https://github.com/<owner>/<name>：{repo_url!r}"
+        )
     return f"{match.group(1)}/{match.group(2)}"
 
 
 def normalize_version(value: str) -> str:
-    return value[1:] if value.startswith("v") else value
+    return value.removeprefix("v")
 
 
 def download_url(repo: str, tag: str, artifact_name: str) -> str:
@@ -168,7 +170,7 @@ def extract_plugin_toml(data: bytes, filename: str) -> bytes | None:
         with zipfile.ZipFile(io.BytesIO(data)) as zf:
             member = _find_manifest(zf.namelist())
             return zf.read(member) if member else None
-    if lower.endswith(".tar.gz") or lower.endswith(".tgz"):
+    if lower.endswith((".tar.gz", ".tgz")):
         with tarfile.open(fileobj=io.BytesIO(data), mode="r:gz") as tf:
             member = _find_manifest(tf.getnames())
             if member is None:
@@ -180,7 +182,9 @@ def extract_plugin_toml(data: bytes, filename: str) -> bytes | None:
 
 def _find_manifest(names: list[str]) -> str | None:
     candidates = [
-        n for n in names if not n.endswith("/") and n.rsplit("/", 1)[-1] == "plugin.toml"
+        n
+        for n in names
+        if not n.endswith("/") and n.rsplit("/", 1)[-1] == "plugin.toml"
     ]
     for name in candidates:
         if name.count("/") == 0:
@@ -230,7 +234,9 @@ def verify_remote(meta: PluginMeta) -> list[str]:
     except (tomllib.TOMLDecodeError, UnicodeDecodeError) as exc:
         return errors + [f"归档内 plugin.toml 解析失败：{exc}"]
     if inner.get("name") != meta.name:
-        errors.append(f"归档内 plugin.toml 的 name `{inner.get('name')}` 与元数据 name `{meta.name}` 不一致")
+        errors.append(
+            f"归档内 plugin.toml 的 name `{inner.get('name')}` 与元数据 name `{meta.name}` 不一致"
+        )
     if normalize_version(str(inner.get("version", ""))) != version:
         errors.append(
             f"归档内 plugin.toml 的 version `{inner.get('version')}` 与元数据 version `{meta.version}` 不一致"
@@ -255,7 +261,9 @@ def build_entry(meta: PluginMeta) -> tuple[dict, list[str]]:
 
     digest = asset_digest(release, meta.artifact_name)
     if digest is None:
-        raise ValueError(f"{repo}: release `{tag}` 资产 `{meta.artifact_name}` 缺失或无 digest")
+        raise ValueError(
+            f"{repo}: release `{tag}` 资产 `{meta.artifact_name}` 缺失或无 digest"
+        )
 
     entry = {
         "name": meta.name,
@@ -282,7 +290,7 @@ def build_index(plugins: dict[str, PluginMeta]) -> tuple[dict, list[str]]:
         warnings.extend(entry_warnings)
     index = {
         "schema": SCHEMA,
-        "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "generated_at": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "plugins": entries,
     }
     return index, warnings
