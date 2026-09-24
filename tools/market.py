@@ -2,7 +2,7 @@
 
 元数据字段与 tuack-ng 的插件清单 `plugin.toml`（registry）对齐：
 
-    name / version / description / authors / license / repo_url / url / minver
+    name / version / description / authors / license / repo_url / url / pluginapi
 
 市场特有：`artifact_name`（release 归档名）。下载地址由 `repo_url` + `version` +
 `artifact_name` 推导为对应 release 的资产；`sha256` 取自该 release 资产的 `digest`。
@@ -54,7 +54,7 @@ class PluginMeta(BaseModel):
     license: str
     repo_url: str
     url: str | None = None
-    minver: str | None = None
+    pluginapi: str
     artifact_name: str
 
     @field_validator("name")
@@ -64,10 +64,10 @@ class PluginMeta(BaseModel):
             raise ValueError("只允许小写字母、数字与 . _ -")
         return value
 
-    @field_validator("version", "minver")
+    @field_validator("version", "pluginapi")
     @classmethod
-    def _check_semver(cls, value: str | None) -> str | None:
-        if value is not None and not SEMVER_RE.match(value):
+    def _check_semver(cls, value: str) -> str:
+        if not SEMVER_RE.match(value):
             raise ValueError("必须是语义化版本")
         return value
 
@@ -241,6 +241,10 @@ def verify_remote(meta: PluginMeta) -> list[str]:
         errors.append(
             f"归档内 plugin.toml 的 version `{inner.get('version')}` 与元数据 version `{meta.version}` 不一致"
         )
+    if inner.get("pluginapi") != meta.pluginapi:
+        errors.append(
+            f"归档内 plugin.toml 的 pluginapi `{inner.get('pluginapi')}` 与元数据 pluginapi `{meta.pluginapi}` 不一致"
+        )
     return errors
 
 
@@ -273,7 +277,7 @@ def build_entry(meta: PluginMeta) -> tuple[dict, list[str]]:
         "license": meta.license,
         "repo_url": meta.repo_url,
         "url": meta.url,
-        "minver": meta.minver,
+        "pluginapi": meta.pluginapi,
         "artifact_name": meta.artifact_name,
         "download_url": download_url(repo, tag, meta.artifact_name),
         "sha256": digest,

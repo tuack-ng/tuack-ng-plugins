@@ -1,11 +1,11 @@
 name = "example"
-version = "1.0.0"
+version = "1.1.0"
 description = "示例插件"
 authors = ["Tuack-NG"]
 license = "MIT"
 repo_url = "https://github.com/tuack-ng/tuack-ng-plugin-example"
 url = "https://github.com/tuack-ng/tuack-ng-plugin-example"
-minver = "1.1.0-alpha.2"
+pluginapi = "2.0.0"
 entry = "example.wasm"
 artifact_name = "example.zip"
 

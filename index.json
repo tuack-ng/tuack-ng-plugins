@@ -1,10 +1,10 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-11T01:55:52Z",
+  "generated_at": "2026-09-24T10:01:44Z",
   "plugins": [
     {
       "name": "example",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "description": "示例插件",
       "authors": [
         "Tuack-NG"
@@ -12,10 +12,10 @@
       "license": "MIT",
       "repo_url": "https://github.com/tuack-ng/tuack-ng-plugin-example",
       "url": "https://github.com/tuack-ng/tuack-ng-plugin-example",
-      "minver": "1.1.0-alpha.2",
+      "pluginapi": "2.0.0",
       "artifact_name": "example.zip",
-      "download_url": "https://github.com/tuack-ng/tuack-ng-plugin-example/releases/download/v1.0.0/example.zip",
-      "sha256": "f013ce2aaab5c39511676f40f8ec54299ccb05ee518cf10e3322054314f302d8"
+      "download_url": "https://github.com/tuack-ng/tuack-ng-plugin-example/releases/download/v1.1.0/example.zip",
+      "sha256": "de36d72ced732fe042d9b1854817267fee02557da475496874a8041c6aed1365"
     }
   ]
 }
